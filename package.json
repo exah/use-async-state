@@ -50,7 +50,7 @@
   "size-limit": [
     {
       "path": "./esm/index.js",
-      "limit": "375B"
+      "limit": "250B"
     }
   ],
   "eslintConfig": {

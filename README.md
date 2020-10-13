@@ -8,7 +8,7 @@ WIP - Not published yet
 
 #### Easy to use hook for capturing async state
 
-- [x] Only ~375B minified and gziped
+- [x] Only ~200B minified and gziped
 - [x] Simple hooks API
 - [x] TypeScript
 
@@ -29,23 +29,26 @@ $ yarn add use-async-state
 Requests data and preserves the result to the state.
 
 ```ts
-type useAsyncState<T> = (initialState?: AsyncState<T>) => AsyncState<T>
+type useAsyncState<T> = () => [AsyncState<T>, AsyncActions<T>]
 ```
 
-`AsyncState` can be in 4 different forms – depending on the promise's state.
+`AsyncState` can be in 5 different forms – depending on the promise state.
 
 ```ts
 export type AsyncState<T> =
-  // initial
-  | { isReady: false; isLoading: false; error: null; result: undefined }
-  // fulfilled
-  | { isReady: true; isLoading: false; error: null; result: T }
-  // pending
-  | { isReady: boolean; isLoading: true; error: Error | null; result?: T }
-  // rejected
-  | { isReady: false; isLoading: false; error: Error; result?: T }
+  | { type: 'idle'; data?: undefined; error?: undefined }
+  | { type: 'loading'; data?: T; error?: Error }
+  | { type: 'ready'; data: T; error?: undefined }
+  | { type: 'updating'; data: T; error?: undefined }
+  | { type: 'failed'; data?: T; error: Error }
 ```
 
+```ts
+export type AsyncActions<T> = {
+  start(): void
+  finish(payload: T | Error): void
+}
+```
 
 ## 🔗 Related
 
