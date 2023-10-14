@@ -1,135 +1,23 @@
 {
-  "name": "use-async-state",
-  "version": "1.0.0",
-  "description": "TODO",
-  "author": "John Grishin <hi@johngrish.in>",
-  "license": "MIT",
-  "repository": "exah/use-async-state",
-  "sideEffects": false,
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "types/index.d.ts",
-  "files": [
-    "cjs",
-    "esm",
-    "types",
-    "server"
+  "name": "salo-project",
+  "private": true,
+  "workspaces": [
+    "packages/demo",
+    "packages/salo"
   ],
-  "keywords": [
-    "react",
-    "ssr",
-    "data",
-    "hook",
-    "isomorphic",
-    "universal",
-    "suspense",
-    "prefetch",
-    "async",
-    "server-rendering"
-  ],
-  "scripts": {
-    "build": "run-s build:*",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:types": "tsc -p tsconfig.types.json",
-    "prebuild": "rimraf esm cjs types",
-    "test": "jest",
-    "lint": "eslint --ext ts --ext js src/",
-    "size": "size-limit",
-    "release": "np --no-cleanup",
-    "version": "auto-changelog -p && git add CHANGELOG.md",
-    "preversion": "npm run build"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "auto-changelog": {
-    "commitLimit": 10,
-    "template": ".changelog.hbs"
-  },
-  "size-limit": [
-    {
-      "path": "./esm/index.js",
-      "limit": "250B"
-    }
-  ],
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "extends": [
-      "standard",
-      "standard-react",
-      "prettier"
-    ],
-    "env": {
-      "jest/globals": true
-    },
-    "plugins": [
-      "jest",
-      "prettier",
-      "@typescript-eslint"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": 2,
-      "@typescript-eslint/no-use-before-define": [
-        2,
-        {
-          "functions": false,
-          "classes": false,
-          "enums": false,
-          "variables": false,
-          "typedefs": false
-        }
-      ],
-      "no-unused-vars": 0,
-      "no-undef": 0,
-      "prettier/prettier": 2,
-      "no-shadow": 2,
-      "react/prop-types": 0,
-      "react/jsx-pascal-case": 0
-    }
-  },
-  "jest": {
-    "preset": "ts-jest/presets/js-with-ts"
-  },
-  "peerDependencies": {
-    "react": "^16.8.13",
-    "react-dom": "^16.13.0"
+  "prettier": {
+    "arrowParens": "always",
+    "singleQuote": true,
+    "semi": false,
+    "trailingComma": "es5",
+    "printWidth": 80
   },
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.4.1",
-    "@testing-library/jest-dom": "^5.2.0",
-    "@testing-library/react": "^10.0.1",
-    "@testing-library/react-hooks": "^3.2.1",
-    "@types/eslint": "^6.1.8",
-    "@types/eslint-plugin-prettier": "^2.2.0",
-    "@types/jest": "^25.1.2",
-    "@types/prettier": "^1.19.1",
-    "@types/react": "^16.9.26",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
-    "auto-changelog": "^1.16.3",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-config-standard-react": "^9.2.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-jest": "^23.7.0",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.19.0",
-    "eslint-plugin-standard": "^4.0.1",
-    "jest": "^25.2.0",
-    "np": "^6.0.0",
+    "np": "^6.5.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.0.2",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-is": "^16.13.1",
-    "react-test-renderer": "^16.13.1",
+    "prettier": "^2.8.8",
     "rimraf": "^3.0.2",
     "size-limit": "^4.4.1",
-    "ts-jest": "^25.2.0",
-    "typescript": "^3.7.5"
+    "typescript": "^5.2.2"
   }
 }
