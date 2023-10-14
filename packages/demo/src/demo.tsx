@@ -38,10 +38,7 @@ function ViewPost({ id }: ViewPostProps) {
 
       return res.json()
     },
-    staleTime: 100000,
   })
-
-  console.log(id, result)
 
   return (
     <>
@@ -70,9 +67,11 @@ function PostsTable() {
     <>
       <table>
         <tbody>
-          {result.data.map((post, index) => (
+          {result.data.slice(0, 5).map((post, index) => (
             <tr key={post.id}>
-              <td valign="top">{post.title}</td>
+              <td valign="top" width={320}>
+                {post.title}
+              </td>
               <td valign="top">
                 <button onClick={() => setId(post.id)}>View</button>
               </td>

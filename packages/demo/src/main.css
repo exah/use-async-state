@@ -20,3 +20,7 @@ h6 {
   line-height: 1.5;
   margin: 0;
 }
+
+table {
+  table-layout: fixed;
+}

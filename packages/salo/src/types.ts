@@ -10,13 +10,8 @@ export interface LoaderOptions<
   cacheTime?: number
 }
 
-export interface LoaderResult<
-  Data = unknown,
-  Key extends LoaderKey = LoaderKey
-> {
-  key: Key
+export interface LoaderResult<Data = unknown> {
   data: Data
-  updatedAt: number
   isUpdating: boolean
   update: () => void
 }
@@ -27,21 +22,30 @@ export interface FetchPayload<Key extends LoaderKey = LoaderKey> {
 }
 
 export interface Subscriber {
-  notify: () => void
+  (): void
 }
 
 export interface Loader<Data, Key extends LoaderKey> {
   key: Key
   hash: string
   controller: AbortController | null
-  promise: Promise<Data> | null
   gcTimeout: ReturnType<typeof setTimeout> | null
+  fetchedAt: number | null
   updatedAt: number | null
   subscribers: Subscriber[]
+  snapshot: LoaderSnapshot<Data>
+  shouldInit: boolean
+  shouldUpdate: boolean
   subscribe: (subscriber: Subscriber) => () => void
+  notify: () => void
   scheduleGC: () => void
   unscheduleGC: () => void
-  fetch: (subscriber: Subscriber) => void
+  fetch: (shouldUpdate?: boolean) => void
+}
+
+export interface LoaderSnapshot<Data> {
+  promise: Promise<Data>
+  isUpdating: boolean
 }
 
 export interface LoaderState<Data> {
@@ -55,13 +59,4 @@ export interface LoaderState<Data> {
 export interface LoaderClient<Data, Key extends LoaderKey> {
   loaders: Loader<Data, Key>[]
   getLoader: (options: LoaderOptions<Data, Key>) => Loader<Data, Key>
-}
-
-export interface LoaderObserver<Data> extends Subscriber {
-  subscribe: (callback: () => void) => () => void
-  fetch: () => void
-  hash: string
-  isFetching: boolean
-  promise: Promise<Data>
-  updatedAt: number
 }

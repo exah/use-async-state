@@ -28,7 +28,7 @@ type Promise<T> =
   | FulfilledPromise<T>
   | FallbackPromise<T>
 
-function exposePromiseState<T>(promise: StatefulPromise<T>): void {
+export function exposePromiseState<T>(promise: StatefulPromise<T>): void {
   promise.status = 'pending'
 
   promise.then(
