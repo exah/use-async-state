@@ -24,9 +24,9 @@ export function useLoader<Data, Key extends LoaderKey = LoaderKey>(
   return {
     data: use(state.promise),
     isUpdating: state.isPending || isPending,
-    update: () =>
+    update: (options) =>
       startTransition(() => {
-        loader.fetch()
+        loader.fetch(options)
       }),
   }
 }

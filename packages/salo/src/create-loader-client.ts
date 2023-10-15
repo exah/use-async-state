@@ -40,7 +40,7 @@ export function createLoaderClient<Data, Key extends LoaderKey>() {
             return loader.invalidate()
           }
 
-          return loader.fetch()
+          return loader.fetch(options)
         })
       )
       return

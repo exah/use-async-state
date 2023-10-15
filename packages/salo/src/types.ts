@@ -13,7 +13,7 @@ export interface LoaderOptions<
 export interface LoaderResult<Data = unknown> {
   data: Data
   isUpdating: boolean
-  update: () => void
+  update: (options?: FetchOptions) => void
 }
 
 export interface FetchPayload<Key extends LoaderKey = LoaderKey> {
@@ -35,15 +35,20 @@ export interface Loader<Data, Key extends LoaderKey> {
   subscribers: Subscriber[]
   snapshot: LoaderSnapshot<Data>
   isStale: boolean
+  promise: Promise<Data> | null
   shouldInit: () => boolean
   shouldInvalidate: () => boolean
   subscribe: (subscriber: Subscriber) => () => void
   notify: () => void
   scheduleGC: () => void
   unscheduleGC: () => void
-  fetch: () => Promise<void>
+  fetch: (options?: FetchOptions) => Promise<Data>
   invalidate: () => void
   cancel: () => void
+}
+
+export interface FetchOptions {
+  cancelFetch?: boolean
 }
 
 export interface LoaderSnapshot<Data> {
@@ -54,10 +59,6 @@ export interface LoaderSnapshot<Data> {
 export type InvalidateType = 'auto' | 'all'
 export type LoaderState = 'active' | 'inactive'
 
-export type Predicate<Data, Key extends LoaderKey> =
-  | Key
-  | ((loader: Loader<Data, Key>) => boolean)
-
 export interface LoaderFilters<Data, Key extends LoaderKey> {
   key?: Key
   state?: LoaderState
@@ -66,7 +67,8 @@ export interface LoaderFilters<Data, Key extends LoaderKey> {
 }
 
 export interface InvalidateOptions<Data, Key extends LoaderKey>
-  extends LoaderFilters<Data, Key> {
+  extends LoaderFilters<Data, Key>,
+    FetchOptions {
   type?: InvalidateType
 }
 

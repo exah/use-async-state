@@ -34,6 +34,7 @@ export function createLoader<Data, Key extends LoaderKey>(
     gcTimeout: null,
     subscribers: [],
     snapshot: DEFAULT_SNAPSHOT,
+    promise: null,
     isStale: true,
     shouldInit: () => loader.snapshot === DEFAULT_SNAPSHOT,
     shouldInvalidate: () =>
@@ -74,7 +75,11 @@ export function createLoader<Data, Key extends LoaderKey>(
       loader.controller?.abort(new CancellationError())
       loader.controller = null
     },
-    fetch: () => {
+    fetch: (options) => {
+      if (loader.promise && !options?.cancelFetch) {
+        return loader.promise
+      }
+
       const handleError = (error: unknown) => {
         if (error instanceof CancellationError) {
           return loader.snapshot.promise
@@ -99,18 +104,22 @@ export function createLoader<Data, Key extends LoaderKey>(
       loader.cancel()
       loader.controller = controller
       loader.isStale = false
+      loader.promise = promise
 
-      return promise
-        .catch(handleError)
+      promise
         .then(() => {
           loader.updatedAt = Date.now()
         })
         .finally(() => {
           loader.snapshot = { promise, isPending: false }
           loader.controller = null
+          loader.promise = null
 
           loader.notify()
         })
+        .catch(handleError)
+
+      return promise
     },
     invalidate: () => (loader.isStale = true),
   }
