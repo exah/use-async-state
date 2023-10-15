@@ -100,7 +100,10 @@ function PostsTable() {
         {result.isUpdating ? 'Updating...' : 'Update'}
       </button>
       <button type="button" onClick={() => client.invalidate()}>
-        Invalidate all
+        Invalidate
+      </button>
+      <button type="button" onClick={() => client.reset()}>
+        Reset
       </button>
     </>
   )
