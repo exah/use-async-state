@@ -1,4 +1,4 @@
-export type LoaderKey = readonly unknown[]
+export type LoaderKey = [unknown, ...unknown[]]
 
 export interface LoaderOptions<
   Data = unknown,
