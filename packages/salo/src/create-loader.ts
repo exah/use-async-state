@@ -10,8 +10,16 @@ import { exposePromiseState } from './use'
 const DEFAULT_STALE_TIME = 1000 // 1 Second
 const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5 Minutes
 const DEFAULT_SNAPSHOT = {
-  promise: Promise.reject(new Error('Promise is required')),
+  get promise() {
+    return Promise.reject(new Error('Promise is required'))
+  },
   isPending: false,
+}
+
+class CancellationError extends Error {
+  constructor() {
+    super('Request is cancelled')
+  }
 }
 
 export function createLoader<Data, Key extends LoaderKey>(
@@ -32,25 +40,25 @@ export function createLoader<Data, Key extends LoaderKey>(
     gcTimeout: null,
     subscribers: [],
     snapshot: DEFAULT_SNAPSHOT,
-    get shouldInit() {
-      return loader.snapshot === DEFAULT_SNAPSHOT
-    },
-    get shouldUpdate() {
-      return (
-        loader.updatedAt === null || Date.now() - loader.updatedAt > staleTime
-      )
-    },
-    shouldInvalidate: false,
+    isStale: true,
+    shouldInit: () => loader.snapshot === DEFAULT_SNAPSHOT,
+    shouldInvalidate: () =>
+      loader.isStale ||
+      (loader.updatedAt !== null && Date.now() - loader.updatedAt > staleTime),
     subscribe: (subscriber) => {
       loader.subscribers.push(subscriber)
       loader.state = 'active'
       loader.unscheduleGC()
 
+      if (loader.shouldInvalidate()) {
+        loader.fetch()
+      }
+
       return () => {
         loader.subscribers = loader.subscribers.filter((d) => d !== subscriber)
-        loader.cancel()
 
         if (loader.subscribers.length === 0) {
+          loader.cancel()
           loader.scheduleGC()
           loader.state = 'inactive'
         }
@@ -69,25 +77,24 @@ export function createLoader<Data, Key extends LoaderKey>(
       }
     },
     cancel: () => {
-      loader.controller?.abort(new Error('Request is cancelled'))
+      loader.controller?.abort(new CancellationError())
       loader.controller = null
     },
-    fetch: async (shouldUpdate = false) => {
-      if (
-        !shouldUpdate &&
-        !loader.shouldInit &&
-        !loader.shouldUpdate &&
-        !loader.shouldInvalidate
-      ) {
-        return Promise.resolve()
-      }
-
+    fetch: async () => {
       const controller = new AbortController()
-      const promise = Promise.resolve(fetch({ key, signal: controller.signal }))
+      const promise = Promise.resolve(
+        fetch({ key, signal: controller.signal })
+      ).catch((error) => {
+        if (error instanceof CancellationError) {
+          return loader.snapshot.promise
+        }
+
+        throw error
+      })
 
       exposePromiseState(promise)
 
-      if (loader.shouldInit) {
+      if (loader.shouldInit()) {
         loader.snapshot = { promise, isPending: true }
       } else {
         loader.snapshot.isPending = true
@@ -95,7 +102,7 @@ export function createLoader<Data, Key extends LoaderKey>(
 
       loader.cancel()
       loader.controller = controller
-      loader.shouldInvalidate = false
+      loader.isStale = false
 
       try {
         await promise
@@ -107,7 +114,7 @@ export function createLoader<Data, Key extends LoaderKey>(
         loader.notify()
       }
     },
-    invalidate: () => (loader.shouldInvalidate = true),
+    invalidate: () => (loader.isStale = true),
   }
 
   return loader

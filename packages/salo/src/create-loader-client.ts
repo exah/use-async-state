@@ -13,6 +13,10 @@ export function createLoaderClient<Data, Key extends LoaderKey>() {
         return client.loaders
       }
 
+      if (filters.predicate) {
+        return client.loaders.filter(filters.predicate)
+      }
+
       const hash = JSON.stringify(filters.key)
       return client.loaders.filter((loader) => loader.hash === hash)
     },
@@ -36,7 +40,7 @@ export function createLoaderClient<Data, Key extends LoaderKey>() {
             return loader.invalidate()
           }
 
-          return loader.fetch(true)
+          return loader.fetch()
         })
       )
       return

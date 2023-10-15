@@ -34,14 +34,14 @@ export interface Loader<Data, Key extends LoaderKey> {
   updatedAt: number | null
   subscribers: Subscriber[]
   snapshot: LoaderSnapshot<Data>
-  shouldInit: boolean
-  shouldUpdate: boolean
-  shouldInvalidate: boolean
+  isStale: boolean
+  shouldInit: () => boolean
+  shouldInvalidate: () => boolean
   subscribe: (subscriber: Subscriber) => () => void
   notify: () => void
   scheduleGC: () => void
   unscheduleGC: () => void
-  fetch: (shouldUpdate?: boolean) => Promise<void>
+  fetch: () => Promise<void>
   invalidate: () => void
   cancel: () => void
 }
@@ -58,22 +58,22 @@ export type Predicate<Data, Key extends LoaderKey> =
   | Key
   | ((loader: Loader<Data, Key>) => boolean)
 
-export interface LoaderFilters<Key extends LoaderKey> {
+export interface LoaderFilters<Data, Key extends LoaderKey> {
   key?: Key
   state?: LoaderState
   exact?: boolean
-  predicate?: (loader: Loader<never, Key>) => boolean
+  predicate?: (loader: Loader<Data, Key>) => boolean
 }
 
-export interface InvalidateOptions<Key extends LoaderKey>
-  extends LoaderFilters<Key> {
+export interface InvalidateOptions<Data, Key extends LoaderKey>
+  extends LoaderFilters<Data, Key> {
   type?: InvalidateType
 }
 
 export interface LoaderClient<Data, Key extends LoaderKey> {
   loaders: Loader<Data, Key>[]
-  find(filters: LoaderFilters<Key>): Loader<Data, Key>[]
+  find(filters: LoaderFilters<Data, Key>): Loader<Data, Key>[]
   getOrCreate(options: LoaderOptions<Data, Key>): Loader<Data, Key>
-  invalidate(options?: InvalidateOptions<Key>): Promise<void>
+  invalidate(options?: InvalidateOptions<Data, Key>): Promise<void>
   reset(): void
 }
