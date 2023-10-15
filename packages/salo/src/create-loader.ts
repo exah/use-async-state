@@ -15,21 +15,24 @@ export function createLoader<Data, Key extends LoaderKey>(
   {
     key,
     fetch,
-    staleTime = DEFAULT_STALE_TIME,
     cacheTime = DEFAULT_CACHE_TIME,
+    staleTime = DEFAULT_STALE_TIME,
   }: LoaderOptions<Data, Key>
 ): Loader<Data, Key> {
-  let snapshot: LoaderSnapshot<Data>
   const loader: Loader<Data, Key> = {
-    key,
+    key: key,
     hash: JSON.stringify(key),
+    state: 'inactive',
     fetchedAt: null,
     updatedAt: null,
     controller: null,
     gcTimeout: null,
     subscribers: [],
-    get snapshot() {
-      return snapshot
+    snapshot: {
+      get promise() {
+        return Promise.reject(new Error('Promise is required'))
+      },
+      isPending: false,
     },
     get shouldInit() {
       return loader.fetchedAt === null
@@ -39,17 +42,19 @@ export function createLoader<Data, Key extends LoaderKey>(
         loader.updatedAt === null || Date.now() - loader.updatedAt > staleTime
       )
     },
+    shouldInvalidate: false,
     subscribe: (subscriber) => {
       loader.subscribers.push(subscriber)
+      loader.state = 'active'
       loader.unscheduleGC()
 
       return () => {
         loader.subscribers = loader.subscribers.filter((d) => d !== subscriber)
-        loader.controller?.abort()
-        loader.controller = null
+        loader.cancel()
 
         if (loader.subscribers.length === 0) {
           loader.scheduleGC()
+          loader.state = 'inactive'
         }
       }
     },
@@ -65,35 +70,44 @@ export function createLoader<Data, Key extends LoaderKey>(
         clearTimeout(loader.gcTimeout)
       }
     },
-    fetch: (shouldUpdate = false) => {
-      if (!shouldUpdate && !loader.shouldInit && !loader.shouldUpdate) {
-        return
+    cancel: () => {
+      loader.controller?.abort(new Error('Request is cancelled'))
+      loader.controller = null
+    },
+    fetch: async (shouldUpdate = false) => {
+      if (
+        !shouldUpdate &&
+        !loader.shouldInit &&
+        !loader.shouldUpdate &&
+        !loader.shouldInvalidate
+      ) {
+        return Promise.resolve()
       }
 
       const controller = new AbortController()
-      const promise = Promise.resolve(
-        fetch({ key: key, signal: controller.signal })
-      )
+      const promise = Promise.resolve(fetch({ key, signal: controller.signal }))
 
       exposePromiseState(promise)
 
-      snapshot ??= { promise, isUpdating: true }
-      snapshot.isUpdating = true
+      if (loader.shouldInit) loader.snapshot = { promise, isPending: true }
+      loader.snapshot.isPending = true
 
+      loader.cancel()
       loader.controller = controller
       loader.fetchedAt = Date.now()
+      loader.shouldInvalidate = false
 
-      promise
-        .then(() => {
-          loader.updatedAt = Date.now()
-        })
-        .finally(() => {
-          snapshot = { promise, isUpdating: false }
+      try {
+        await promise
+        loader.updatedAt = Date.now()
+      } finally {
+        loader.snapshot = { promise, isPending: false }
+        loader.controller = null
 
-          loader.controller = null
-          loader.notify()
-        })
+        loader.notify()
+      }
     },
+    invalidate: () => (loader.shouldInvalidate = true),
   }
 
   return loader

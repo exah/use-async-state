@@ -1,4 +1,4 @@
-export type LoaderKey = readonly (string | number)[]
+export type LoaderKey = readonly unknown[]
 
 export interface LoaderOptions<
   Data = unknown,
@@ -28,6 +28,7 @@ export interface Subscriber {
 export interface Loader<Data, Key extends LoaderKey> {
   key: Key
   hash: string
+  state: LoaderState
   controller: AbortController | null
   gcTimeout: ReturnType<typeof setTimeout> | null
   fetchedAt: number | null
@@ -36,27 +37,44 @@ export interface Loader<Data, Key extends LoaderKey> {
   snapshot: LoaderSnapshot<Data>
   shouldInit: boolean
   shouldUpdate: boolean
+  shouldInvalidate: boolean
   subscribe: (subscriber: Subscriber) => () => void
   notify: () => void
   scheduleGC: () => void
   unscheduleGC: () => void
-  fetch: (shouldUpdate?: boolean) => void
+  fetch: (shouldUpdate?: boolean) => Promise<void>
+  invalidate: () => void
+  cancel: () => void
 }
 
 export interface LoaderSnapshot<Data> {
   promise: Promise<Data>
-  isUpdating: boolean
+  isPending: boolean
 }
 
-export interface LoaderState<Data> {
-  status: 'success' | 'error' | 'loading'
-  data: Data | undefined
-  updatedAt: number | undefined
-  isFetching: boolean
-  error: unknown
+export type InvalidateType = 'auto' | 'all'
+export type LoaderState = 'active' | 'inactive'
+
+export type Predicate<Data, Key extends LoaderKey> =
+  | Key
+  | ((loader: Loader<Data, Key>) => boolean)
+
+export interface LoaderFilters<Key extends LoaderKey> {
+  key?: Key
+  state?: LoaderState
+  exact?: boolean
+  predicate?: (loader: Loader<never, Key>) => boolean
+}
+
+export interface InvalidateOptions<Key extends LoaderKey>
+  extends LoaderFilters<Key> {
+  type?: InvalidateType
 }
 
 export interface LoaderClient<Data, Key extends LoaderKey> {
   loaders: Loader<Data, Key>[]
-  getLoader: (options: LoaderOptions<Data, Key>) => Loader<Data, Key>
+  find(filters: LoaderFilters<Key>): Loader<Data, Key>[]
+  getOrCreate(options: LoaderOptions<Data, Key>): Loader<Data, Key>
+  invalidate(options?: InvalidateOptions<Key>): Promise<void>
+  reset(): void
 }

@@ -1,5 +1,10 @@
 import { useState, Suspense } from 'react'
-import { useLoader, useCaughtError, ErrorBoundary } from '@exah/salo'
+import {
+  useLoader,
+  useLoaderClient,
+  useCaughtError,
+  ErrorBoundary,
+} from '@exah/salo'
 
 function LoadingStatus() {
   return <>Loading...</>
@@ -50,6 +55,7 @@ function ViewPost({ id }: ViewPostProps) {
 
 function PostsTable() {
   const [id, setId] = useState<number | null>(null)
+  const client = useLoaderClient()
 
   const result = useLoader({
     key: ['posts'],
@@ -92,6 +98,9 @@ function PostsTable() {
         disabled={result.isUpdating}
       >
         {result.isUpdating ? 'Updating...' : 'Update'}
+      </button>
+      <button type="button" onClick={() => client.invalidate()}>
+        Invalidate all
       </button>
     </>
   )

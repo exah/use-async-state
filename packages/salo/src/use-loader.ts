@@ -9,7 +9,7 @@ export function useLoader<Data, Key extends LoaderKey = LoaderKey>(
   const [isPending, startTransition] = useTransition()
 
   const client = useLoaderClient<Data, Key>()
-  const loader = client.getLoader(options)
+  const loader = client.getOrCreate(options)
 
   if (loader.shouldInit) {
     loader.fetch()
@@ -23,7 +23,10 @@ export function useLoader<Data, Key extends LoaderKey = LoaderKey>(
 
   return {
     data: use(state.promise),
-    isUpdating: state.isUpdating || isPending,
-    update: () => startTransition(() => loader.fetch(true)),
+    isUpdating: state.isPending || isPending,
+    update: () =>
+      startTransition(() => {
+        loader.fetch(true)
+      }),
   }
 }
