@@ -9,6 +9,10 @@ import { exposePromiseState } from './use'
 
 const DEFAULT_STALE_TIME = 1000 // 1 Second
 const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5 Minutes
+const DEFAULT_SNAPSHOT = {
+  promise: Promise.reject(new Error('Promise is required')),
+  isPending: false,
+}
 
 export function createLoader<Data, Key extends LoaderKey>(
   client: LoaderClient<Data, Key>,
@@ -23,19 +27,13 @@ export function createLoader<Data, Key extends LoaderKey>(
     key: key,
     hash: JSON.stringify(key),
     state: 'inactive',
-    fetchedAt: null,
     updatedAt: null,
     controller: null,
     gcTimeout: null,
     subscribers: [],
-    snapshot: {
-      get promise() {
-        return Promise.reject(new Error('Promise is required'))
-      },
-      isPending: false,
-    },
+    snapshot: DEFAULT_SNAPSHOT,
     get shouldInit() {
-      return loader.fetchedAt === null
+      return loader.snapshot === DEFAULT_SNAPSHOT
     },
     get shouldUpdate() {
       return (
@@ -89,12 +87,14 @@ export function createLoader<Data, Key extends LoaderKey>(
 
       exposePromiseState(promise)
 
-      if (loader.shouldInit) loader.snapshot = { promise, isPending: true }
-      loader.snapshot.isPending = true
+      if (loader.shouldInit) {
+        loader.snapshot = { promise, isPending: true }
+      } else {
+        loader.snapshot.isPending = true
+      }
 
       loader.cancel()
       loader.controller = controller
-      loader.fetchedAt = Date.now()
       loader.shouldInvalidate = false
 
       try {

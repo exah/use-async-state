@@ -31,7 +31,6 @@ export interface Loader<Data, Key extends LoaderKey> {
   state: LoaderState
   controller: AbortController | null
   gcTimeout: ReturnType<typeof setTimeout> | null
-  fetchedAt: number | null
   updatedAt: number | null
   subscribers: Subscriber[]
   snapshot: LoaderSnapshot<Data>
