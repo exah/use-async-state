@@ -1,10 +1,4 @@
-import type {
-  LoaderOptions,
-  LoaderKey,
-  LoaderClient,
-  LoaderSnapshot,
-  Loader,
-} from './types'
+import type { LoaderOptions, LoaderKey, LoaderClient, Loader } from './types'
 import { exposePromiseState } from './use'
 
 const DEFAULT_STALE_TIME = 1000 // 1 Second
@@ -80,17 +74,19 @@ export function createLoader<Data, Key extends LoaderKey>(
       loader.controller?.abort(new CancellationError())
       loader.controller = null
     },
-    fetch: async () => {
-      const controller = new AbortController()
-      const promise = Promise.resolve(
-        fetch({ key, signal: controller.signal })
-      ).catch((error) => {
+    fetch: () => {
+      const handleError = (error: unknown) => {
         if (error instanceof CancellationError) {
           return loader.snapshot.promise
         }
 
         throw error
-      })
+      }
+
+      const controller = new AbortController()
+      const promise = Promise.resolve(
+        fetch({ key, signal: controller.signal })
+      ).catch(handleError)
 
       exposePromiseState(promise)
 
@@ -104,15 +100,17 @@ export function createLoader<Data, Key extends LoaderKey>(
       loader.controller = controller
       loader.isStale = false
 
-      try {
-        await promise
-        loader.updatedAt = Date.now()
-      } finally {
-        loader.snapshot = { promise, isPending: false }
-        loader.controller = null
+      return promise
+        .catch(handleError)
+        .then(() => {
+          loader.updatedAt = Date.now()
+        })
+        .finally(() => {
+          loader.snapshot = { promise, isPending: false }
+          loader.controller = null
 
-        loader.notify()
-      }
+          loader.notify()
+        })
     },
     invalidate: () => (loader.isStale = true),
   }
