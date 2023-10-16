@@ -27,7 +27,7 @@ export interface Subscriber {
 
 export interface Loader<Data, Key extends LoaderKey> {
   key: Key
-  hash: string
+  hash: string[]
   state: LoaderState
   controller: AbortController | null
   gcTimeout: ReturnType<typeof setTimeout> | null
@@ -53,7 +53,7 @@ export interface FetchOptions {
 
 export interface LoaderSnapshot<Data> {
   promise: Promise<Data>
-  isPending: boolean
+  pending: boolean
 }
 
 export type InvalidateType = 'auto' | 'all'
@@ -63,6 +63,8 @@ export interface LoaderFilters<Data, Key extends LoaderKey> {
   key?: Key
   state?: LoaderState
   exact?: boolean
+  stale?: boolean
+  pending?: boolean
   predicate?: (loader: Loader<Data, Key>) => boolean
 }
 

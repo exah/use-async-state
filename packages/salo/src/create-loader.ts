@@ -1,13 +1,19 @@
-import type { LoaderOptions, LoaderKey, LoaderClient, Loader } from './types'
+import type {
+  LoaderOptions,
+  LoaderKey,
+  LoaderClient,
+  LoaderSnapshot,
+  Loader,
+} from './types'
 import { exposePromiseState } from './use'
 
 const DEFAULT_STALE_TIME = 1000 // 1 Second
 const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5 Minutes
-const DEFAULT_SNAPSHOT = {
+const DEFAULT_SNAPSHOT: LoaderSnapshot<never> = {
   get promise() {
     return Promise.reject(new Error('Promise is required'))
   },
-  isPending: false,
+  pending: false,
 }
 
 class CancellationError extends Error {
@@ -27,7 +33,7 @@ export function createLoader<Data, Key extends LoaderKey>(
 ): Loader<Data, Key> {
   const loader: Loader<Data, Key> = {
     key: key,
-    hash: JSON.stringify(key),
+    hash: key.map((part) => JSON.stringify(part)),
     state: 'inactive',
     updatedAt: null,
     controller: null,
@@ -96,9 +102,9 @@ export function createLoader<Data, Key extends LoaderKey>(
       exposePromiseState(promise)
 
       if (loader.shouldInit()) {
-        loader.snapshot = { promise, isPending: true }
+        loader.snapshot = { promise, pending: true }
       } else {
-        loader.snapshot.isPending = true
+        loader.snapshot.pending = true
       }
 
       loader.cancel()
@@ -111,7 +117,7 @@ export function createLoader<Data, Key extends LoaderKey>(
           loader.updatedAt = Date.now()
         })
         .finally(() => {
-          loader.snapshot = { promise, isPending: false }
+          loader.snapshot = { promise, pending: false }
           loader.controller = null
           loader.promise = null
 

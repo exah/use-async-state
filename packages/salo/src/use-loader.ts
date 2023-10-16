@@ -23,7 +23,7 @@ export function useLoader<Data, Key extends LoaderKey = LoaderKey>(
 
   return {
     data: use(state.promise),
-    isUpdating: state.isPending || isPending,
+    isUpdating: state.pending || isPending,
     update: (options) =>
       startTransition(() => {
         loader.fetch(options)
