@@ -1,6 +1,6 @@
 import type { LoaderKey, LoaderClient } from './types'
 import { createLoader } from './create-loader'
-import { matchFilter } from './utils'
+import { matchFilter } from './filters'
 
 export function createLoaderClient<Data, Key extends LoaderKey>() {
   const client: LoaderClient<Data, Key> = {

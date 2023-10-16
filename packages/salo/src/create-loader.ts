@@ -5,14 +5,14 @@ import type {
   LoaderSnapshot,
   Loader,
 } from './types'
-import { exposePromiseState } from './use'
-import { getHash } from './utils'
+import { toSuspensePromise } from './promise'
+import { getHash } from './filters'
 
 const DEFAULT_STALE_TIME = 1000 // 1 Second
 const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5 Minutes
 const DEFAULT_SNAPSHOT: LoaderSnapshot<never> = {
   get promise() {
-    return Promise.reject(new Error('Promise is required'))
+    return toSuspensePromise(Promise.reject(new Error('Promise is required')))
   },
   pending: false,
 }
@@ -96,11 +96,11 @@ export function createLoader<Data, Key extends LoaderKey>(
       }
 
       const controller = new AbortController()
-      const promise = Promise.resolve(
-        fetch({ key, signal: controller.signal })
-      ).catch(handleError)
-
-      exposePromiseState(promise)
+      const promise = toSuspensePromise(
+        Promise.resolve(fetch({ key, signal: controller.signal })).catch(
+          handleError
+        )
+      )
 
       if (loader.shouldInit()) {
         loader.snapshot = { promise, pending: true }

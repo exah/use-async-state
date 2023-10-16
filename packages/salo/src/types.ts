@@ -1,3 +1,5 @@
+import type { SuspensePromise } from './promise'
+
 export type LoaderKey = [unknown, ...unknown[]]
 
 export interface LoaderOptions<
@@ -52,7 +54,7 @@ export interface FetchOptions {
 }
 
 export interface LoaderSnapshot<Data> {
-  promise: Promise<Data>
+  promise: SuspensePromise<Data>
   pending: boolean
 }
 
