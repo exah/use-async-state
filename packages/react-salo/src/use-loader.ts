@@ -1,6 +1,6 @@
 import { useTransition, useSyncExternalStore } from 'react'
 import type { LoaderKey, LoaderOptions, LoaderResult } from 'salo'
-import { useClient } from './client-context'
+import { useClient } from './use-client'
 import { use } from './use'
 
 export function useLoader<Data, Key extends LoaderKey = LoaderKey>(

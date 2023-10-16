@@ -3,6 +3,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "moduleResolution": "Bundler",
+    "module": "ESNext",
     "jsx": "react-jsx"
   },
   "exclude": ["node_modules"]
