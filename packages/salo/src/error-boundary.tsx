@@ -9,8 +9,18 @@ type ErrorBoundaryState =
   | { didCatch: true; error: unknown }
   | { didCatch: false; error: undefined }
 
-const ErrorBoundaryContext = createContext<unknown>(undefined)
-export const useCaughtError = () => useContext(ErrorBoundaryContext)
+const ErrorBoundaryContext = createContext<
+  [error: unknown, recover: () => void] | null
+>(null)
+
+export const useCaughtError = () => {
+  const value = useContext(ErrorBoundaryContext)
+
+  if (value === null)
+    throw new Error('`useCaughtError` hook must be used inside `ErrorBoundary`')
+
+  return value
+}
 
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
@@ -26,10 +36,14 @@ export class ErrorBoundary extends Component<
     return { didCatch: true, error }
   }
 
+  recover = () => {
+    this.setState({ didCatch: false, error: undefined })
+  }
+
   render() {
     if (this.state.didCatch) {
       return (
-        <ErrorBoundaryContext.Provider value={this.state.error}>
+        <ErrorBoundaryContext.Provider value={[this.state.error, this.recover]}>
           {this.props.fallback}
         </ErrorBoundaryContext.Provider>
       )

@@ -11,10 +11,17 @@ function LoadingStatus() {
 }
 
 function ErrorStatus() {
-  const error = useCaughtError()
+  const [error, recover] = useCaughtError()
 
   if (error instanceof Error) {
-    return error.message
+    return (
+      <>
+        Error: {error.message}{' '}
+        <button type="button" onClick={recover}>
+          Recover
+        </button>
+      </>
+    )
   }
 
   return <>Something went wrong</>
@@ -35,6 +42,10 @@ function ViewPost({ id }: ViewPostProps) {
   const result = useLoader({
     key: ['posts', id],
     fetch: async ({ signal }): Promise<Post> => {
+      if (id === 2) {
+        throw new Error('Unavailable')
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 500))
       const res = await fetch(
         `https://jsonplaceholder.typicode.com/posts/${id}`,
@@ -83,9 +94,11 @@ function PostsTable() {
               </td>
               {index === 0 && id !== null && (
                 <td rowSpan={result.data.length} valign="top">
-                  <Suspense fallback={<LoadingStatus />}>
-                    <ViewPost id={id} />
-                  </Suspense>
+                  <ErrorBoundary fallback={<ErrorStatus />}>
+                    <Suspense fallback={<LoadingStatus />}>
+                      <ViewPost id={id} />
+                    </Suspense>
+                  </ErrorBoundary>
                 </td>
               )}
             </tr>
