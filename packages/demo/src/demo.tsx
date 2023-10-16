@@ -6,6 +6,10 @@ import {
   ErrorBoundary,
 } from '@exah/salo'
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 function LoadingStatus() {
   return <>Loading...</>
 }
@@ -42,11 +46,12 @@ function ViewPost({ id }: ViewPostProps) {
   const result = useLoader({
     key: ['posts', id],
     fetch: async ({ signal }): Promise<Post> => {
+      await sleep(500)
+
       if (id === 2) {
         throw new Error('Unavailable')
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500))
       const res = await fetch(
         `https://jsonplaceholder.typicode.com/posts/${id}`,
         { signal }
@@ -71,7 +76,7 @@ function PostsTable() {
   const result = useLoader({
     key: ['posts'],
     fetch: async ({ signal }): Promise<Post[]> => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await sleep(500)
       const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
         signal,
       })

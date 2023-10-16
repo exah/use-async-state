@@ -34,9 +34,10 @@ export interface Loader<Data, Key extends LoaderKey> {
   controller: AbortController | null
   gcTimeout: ReturnType<typeof setTimeout> | null
   updatedAt: number | null
+  failedAt: number | null
   subscribers: Subscriber[]
   snapshot: LoaderSnapshot<Data>
-  isStale: boolean
+  stale: boolean
   promise: Promise<Data> | null
   shouldInit: () => boolean
   shouldInvalidate: () => boolean

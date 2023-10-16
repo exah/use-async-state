@@ -37,17 +37,21 @@ export function createLoader<Data, Key extends LoaderKey>(
     hash: getHash(key),
     state: 'inactive',
     updatedAt: null,
+    failedAt: null,
     controller: null,
     gcTimeout: null,
     subscribers: [],
     snapshot: DEFAULT_SNAPSHOT,
     promise: null,
-    isStale: true,
-    shouldInit: () => loader.snapshot === DEFAULT_SNAPSHOT,
+    stale: true,
+    shouldInit: () =>
+      loader.snapshot === DEFAULT_SNAPSHOT ||
+      (loader.failedAt !== null && Date.now() - loader.failedAt > staleTime),
     shouldInvalidate: () =>
-      loader.isStale ||
+      loader.stale ||
       (loader.updatedAt !== null && Date.now() - loader.updatedAt > staleTime),
     subscribe: (subscriber) => {
+      console.log('loader.subscribe', loader.key)
       loader.subscribers.push(subscriber)
       loader.state = 'active'
       loader.unscheduleGC()
@@ -57,6 +61,7 @@ export function createLoader<Data, Key extends LoaderKey>(
       }
 
       return () => {
+        console.log('loader.unsubscribe', loader.key)
         loader.subscribers = loader.subscribers.filter((d) => d !== subscriber)
 
         if (loader.subscribers.length === 0) {
@@ -86,6 +91,8 @@ export function createLoader<Data, Key extends LoaderKey>(
       client.loaders = client.loaders.filter((d) => d !== loader)
     },
     fetch: (options) => {
+      console.log('loader.fetch', loader.key)
+
       if (loader.promise && !options?.cancelFetch) {
         return loader.promise
       }
@@ -113,7 +120,7 @@ export function createLoader<Data, Key extends LoaderKey>(
 
       loader.cancel()
       loader.controller = controller
-      loader.isStale = false
+      loader.stale = false
       loader.promise = promise
 
       promise
@@ -121,6 +128,7 @@ export function createLoader<Data, Key extends LoaderKey>(
           loader.updatedAt = Date.now()
         })
         .catch(() => {
+          loader.failedAt = Date.now()
           loader.invalidate()
         })
         .finally(() => {
@@ -133,7 +141,7 @@ export function createLoader<Data, Key extends LoaderKey>(
 
       return promise
     },
-    invalidate: () => (loader.isStale = true),
+    invalidate: () => (loader.stale = true),
   }
 
   return loader

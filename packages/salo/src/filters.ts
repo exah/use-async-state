@@ -29,6 +29,6 @@ export const matchFilter = <Data, Key extends LoaderKey>(
   return (loader: Loader<Data, Key>) =>
     (!hash || matchFilterKey(hash, loader.hash, filter.exact)) &&
     (!filter.state || filter.state === loader.state) &&
-    (!filter.stale || filter.stale === loader.isStale) &&
+    (!filter.stale || filter.stale === loader.stale) &&
     (!filter.pending || filter.pending === loader.snapshot.pending)
 }
