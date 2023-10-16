@@ -54,6 +54,7 @@ export function createLoader<Data, Key extends LoaderKey>(
       loader.subscribers.push(subscriber)
       loader.state = 'active'
       loader.unscheduleGC()
+      client.notify()
 
       if (loader.shouldInvalidate()) {
         loader.fetch()
@@ -61,15 +62,18 @@ export function createLoader<Data, Key extends LoaderKey>(
 
       return () => {
         loader.subscribers = loader.subscribers.filter((d) => d !== subscriber)
+        client.notify()
 
         if (loader.subscribers.length === 0) {
           loader.cancel()
           loader.scheduleGC()
-          loader.state = 'inactive'
         }
       }
     },
-    notify: () => loader.subscribers.forEach((subscriber) => subscriber()),
+    notify: () =>
+      requestIdleCallback(() =>
+        loader.subscribers.forEach((subscriber) => subscriber())
+      ),
     scheduleGC: () => {
       loader.gcTimeout = setTimeout(() => {
         loader.remove()
@@ -87,6 +91,7 @@ export function createLoader<Data, Key extends LoaderKey>(
     },
     remove: () => {
       client.loaders = client.loaders.filter((d) => d !== loader)
+      client.notify()
     },
     fetch: (options) => {
       if (loader.promise && !options?.cancelFetch) {
@@ -114,6 +119,7 @@ export function createLoader<Data, Key extends LoaderKey>(
         loader.snapshot.pending = true
       }
 
+      client.notify()
       loader.cancel()
       loader.controller = controller
       loader.stale = false
@@ -122,9 +128,11 @@ export function createLoader<Data, Key extends LoaderKey>(
       promise
         .then(() => {
           loader.updatedAt = Date.now()
+          loader.failedAt = null
         })
         .catch(() => {
           loader.failedAt = Date.now()
+          loader.updatedAt = null
           loader.invalidate()
         })
         .finally(() => {
@@ -133,11 +141,15 @@ export function createLoader<Data, Key extends LoaderKey>(
           loader.promise = null
 
           loader.notify()
+          client.notify()
         })
 
       return promise
     },
-    invalidate: () => (loader.stale = true),
+    invalidate: () => {
+      loader.stale = true
+      client.notify()
+    },
   }
 
   return loader

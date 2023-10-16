@@ -80,9 +80,12 @@ export interface InvalidateOptions<Data, Key extends LoaderKey>
 
 export interface LoaderClient<Data, Key extends LoaderKey> {
   loaders: Loader<Data, Key>[]
+  subscribers: Subscriber[]
   find(filter: LoaderFilter<Data, Key>): Loader<Data, Key>[]
   findOne(filter: LoaderFilter<Data, Key>): Loader<Data, Key> | undefined
   getOrCreate(options: LoaderOptions<Data, Key>): Loader<Data, Key>
   invalidate(options?: InvalidateOptions<Data, Key>): Promise<void>
   reset(): void
+  subscribe(subscriber: Subscriber): () => void
+  notify(): void
 }

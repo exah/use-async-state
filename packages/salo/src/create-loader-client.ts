@@ -34,7 +34,20 @@ export function createLoaderClient<Data, Key extends LoaderKey>() {
     },
     reset: () => {
       client.loaders = []
+      client.notify()
     },
+    subscribers: [],
+    subscribe: (subscriber) => {
+      client.subscribers.push(subscriber)
+
+      return () => {
+        client.subscribers = client.subscribers.filter((d) => d !== subscriber)
+      }
+    },
+    notify: () =>
+      requestIdleCallback(() =>
+        client.subscribers.forEach((subscriber) => subscriber())
+      ),
   }
 
   return client

@@ -1,10 +1,5 @@
 import { useState, Suspense } from 'react'
-import {
-  useLoader,
-  useLoaderClient,
-  useCaughtError,
-  ErrorBoundary,
-} from '@exah/salo'
+import { useLoader, useCaughtError, ErrorBoundary, DevTools } from '@exah/salo'
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -71,8 +66,6 @@ function ViewPost({ id }: ViewPostProps) {
 
 function PostsTable() {
   const [id, setId] = useState<number | null>(null)
-  const client = useLoaderClient()
-
   const result = useLoader({
     key: ['posts'],
     fetch: async ({ signal }): Promise<Post[]> => {
@@ -87,6 +80,13 @@ function PostsTable() {
 
   return (
     <>
+      <button
+        type="button"
+        onClick={() => result.update()}
+        disabled={result.isUpdating}
+      >
+        {result.isUpdating ? 'Updating...' : 'Update'}
+      </button>
       <table>
         <tbody>
           {result.data.slice(0, 5).map((post, index) => (
@@ -99,7 +99,7 @@ function PostsTable() {
               </td>
               {index === 0 && id !== null && (
                 <td rowSpan={result.data.length} valign="top">
-                  <ErrorBoundary fallback={<ErrorStatus />}>
+                  <ErrorBoundary key={id} fallback={<ErrorStatus />}>
                     <Suspense fallback={<LoadingStatus />}>
                       <ViewPost id={id} />
                     </Suspense>
@@ -110,19 +110,6 @@ function PostsTable() {
           ))}
         </tbody>
       </table>
-      <button
-        type="button"
-        onClick={() => result.update()}
-        disabled={result.isUpdating}
-      >
-        {result.isUpdating ? 'Updating...' : 'Update'}
-      </button>
-      <button type="button" onClick={() => client.invalidate()}>
-        Invalidate
-      </button>
-      <button type="button" onClick={() => client.reset()}>
-        Reset
-      </button>
     </>
   )
 }
@@ -138,6 +125,7 @@ export function Demo() {
           </Suspense>
         </ErrorBoundary>
       </div>
+      <DevTools />
     </>
   )
 }
