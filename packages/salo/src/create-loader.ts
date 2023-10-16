@@ -51,7 +51,6 @@ export function createLoader<Data, Key extends LoaderKey>(
       loader.stale ||
       (loader.updatedAt !== null && Date.now() - loader.updatedAt > staleTime),
     subscribe: (subscriber) => {
-      console.log('loader.subscribe', loader.key)
       loader.subscribers.push(subscriber)
       loader.state = 'active'
       loader.unscheduleGC()
@@ -61,7 +60,6 @@ export function createLoader<Data, Key extends LoaderKey>(
       }
 
       return () => {
-        console.log('loader.unsubscribe', loader.key)
         loader.subscribers = loader.subscribers.filter((d) => d !== subscriber)
 
         if (loader.subscribers.length === 0) {
@@ -91,8 +89,6 @@ export function createLoader<Data, Key extends LoaderKey>(
       client.loaders = client.loaders.filter((d) => d !== loader)
     },
     fetch: (options) => {
-      console.log('loader.fetch', loader.key)
-
       if (loader.promise && !options?.cancelFetch) {
         return loader.promise
       }
