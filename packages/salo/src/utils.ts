@@ -15,7 +15,7 @@ export const matchFilterKey = (
 ) =>
   exact
     ? hashA.join() === hashB.join()
-    : hashA.some((part, index) => part === hashB[index])
+    : hashA.reduce((acc, part, index) => acc && part === hashB[index], true)
 
 export const matchFilter = <Data, Key extends LoaderKey>(
   filter: LoaderFilter<Data, Key>
