@@ -120,6 +120,9 @@ export function createLoader<Data, Key extends LoaderKey>(
         .then(() => {
           loader.updatedAt = Date.now()
         })
+        .catch(() => {
+          loader.invalidate()
+        })
         .finally(() => {
           loader.snapshot = { promise, pending: false }
           loader.controller = null
@@ -127,7 +130,6 @@ export function createLoader<Data, Key extends LoaderKey>(
 
           loader.notify()
         })
-        .catch(handleError)
 
       return promise
     },
