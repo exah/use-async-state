@@ -65,6 +65,7 @@ export function createLoader<Data, Key extends LoaderKey>(
         client.notify()
 
         if (loader.subscribers.length === 0) {
+          loader.state = 'inactive'
           loader.cancel()
           loader.scheduleGC()
         }
