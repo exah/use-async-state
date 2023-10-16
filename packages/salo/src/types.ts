@@ -59,7 +59,7 @@ export interface LoaderSnapshot<Data> {
 export type InvalidateType = 'auto' | 'all'
 export type LoaderState = 'active' | 'inactive'
 
-export interface LoaderFilters<Data, Key extends LoaderKey> {
+export interface LoaderFilter<Data, Key extends LoaderKey> {
   key?: Key
   state?: LoaderState
   exact?: boolean
@@ -69,14 +69,15 @@ export interface LoaderFilters<Data, Key extends LoaderKey> {
 }
 
 export interface InvalidateOptions<Data, Key extends LoaderKey>
-  extends LoaderFilters<Data, Key>,
+  extends LoaderFilter<Data, Key>,
     FetchOptions {
   type?: InvalidateType
 }
 
 export interface LoaderClient<Data, Key extends LoaderKey> {
   loaders: Loader<Data, Key>[]
-  find(filters: LoaderFilters<Data, Key>): Loader<Data, Key>[]
+  find(filter: LoaderFilter<Data, Key>): Loader<Data, Key>[]
+  findOne(filter: LoaderFilter<Data, Key>): Loader<Data, Key> | undefined
   getOrCreate(options: LoaderOptions<Data, Key>): Loader<Data, Key>
   invalidate(options?: InvalidateOptions<Data, Key>): Promise<void>
   reset(): void

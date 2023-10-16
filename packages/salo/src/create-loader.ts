@@ -6,6 +6,7 @@ import type {
   Loader,
 } from './types'
 import { exposePromiseState } from './use'
+import { getHash } from './utils'
 
 const DEFAULT_STALE_TIME = 1000 // 1 Second
 const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5 Minutes
@@ -32,8 +33,8 @@ export function createLoader<Data, Key extends LoaderKey>(
   }: LoaderOptions<Data, Key>
 ): Loader<Data, Key> {
   const loader: Loader<Data, Key> = {
-    key: key,
-    hash: key.map((part) => JSON.stringify(part)),
+    key,
+    hash: getHash(key),
     state: 'inactive',
     updatedAt: null,
     controller: null,
