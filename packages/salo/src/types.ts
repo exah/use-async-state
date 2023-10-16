@@ -47,6 +47,7 @@ export interface Loader<Data, Key extends LoaderKey> {
   fetch: (options?: FetchOptions) => Promise<Data>
   invalidate: () => void
   cancel: () => void
+  remove: () => void
 }
 
 export interface FetchOptions {

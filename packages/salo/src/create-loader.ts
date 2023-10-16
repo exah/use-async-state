@@ -69,7 +69,7 @@ export function createLoader<Data, Key extends LoaderKey>(
     notify: () => loader.subscribers.forEach((subscriber) => subscriber()),
     scheduleGC: () => {
       loader.gcTimeout = setTimeout(() => {
-        client.loaders = client.loaders.filter((d) => d !== loader)
+        loader.remove()
         loader.gcTimeout = null
       }, cacheTime)
     },
@@ -81,6 +81,9 @@ export function createLoader<Data, Key extends LoaderKey>(
     cancel: () => {
       loader.controller?.abort(new CancellationError())
       loader.controller = null
+    },
+    remove: () => {
+      client.loaders = client.loaders.filter((d) => d !== loader)
     },
     fetch: (options) => {
       if (loader.promise && !options?.cancelFetch) {

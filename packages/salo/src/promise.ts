@@ -1,47 +1,44 @@
-interface PendingPromise<T> extends Promise<T> {
+interface PendingStatus {
   status: 'pending'
 }
 
-interface RejectedPromise extends Promise<never> {
+interface RejectedStatus {
   status: 'rejected'
   reason: unknown
 }
 
-interface FulfilledPromise<T> extends Promise<T> {
+interface FulfilledStatus<T> {
   status: 'fulfilled'
   result: T
 }
+
+interface PendingPromise<T> extends Promise<T>, PendingStatus {}
+interface RejectedPromise extends Promise<never>, RejectedStatus {}
+interface FulfilledPromise<T> extends Promise<T>, FulfilledStatus<T> {}
 
 export type SuspensePromise<T> =
   | PendingPromise<T>
   | RejectedPromise
   | FulfilledPromise<T>
 
-interface PromiseTemplate<T> extends Promise<T> {
-  status?: 'pending' | 'rejected' | 'fulfilled'
-  result?: T
-  reason?: unknown
-}
-
-export function toSuspensePromise<T>(
-  input: Promise<T> | T
-): SuspensePromise<T> {
-  const promise: PromiseTemplate<T> = Promise.resolve(input)
-
-  promise.status = 'pending'
-  promise.then(
-    (value) => {
-      promise.status = 'fulfilled'
-      promise.result = value
-    },
-    (error) => {
-      promise.status = 'rejected'
-      promise.reason = error
-    }
+export function toSuspensePromise<T>(input: Promise<T>): SuspensePromise<T> {
+  const promise = Object.assign<Promise<T>, PendingStatus>(
+    Promise.resolve(input),
+    { status: 'pending' }
   )
 
-  assertPromise(promise)
+  promise.then(
+    (value) =>
+      Object.assign<Promise<T>, FulfilledStatus<T>>(promise, {
+        status: 'fulfilled',
+        result: value,
+      }),
+    (error) =>
+      Object.assign<Promise<T>, RejectedStatus>(promise, {
+        status: 'rejected',
+        reason: error,
+      })
+  )
+
   return promise
 }
-
-function assertPromise<T>(_: Promise<T>): asserts _ is SuspensePromise<T> {}
