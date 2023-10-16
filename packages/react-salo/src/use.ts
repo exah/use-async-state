@@ -1,4 +1,4 @@
-import type { SuspensePromise } from './promise'
+import type { SuspensePromise } from 'salo'
 
 export function use<T>(promise: SuspensePromise<T>): T {
   switch (promise.status) {

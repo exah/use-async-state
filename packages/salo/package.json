@@ -1,5 +1,5 @@
 {
-  "name": "react-salo",
+  "name": "salo",
   "type": "module",
   "version": "0.0.0",
   "sideEffects": false,
@@ -15,5 +15,8 @@
   "devDependencies": {
     "@types/react": "^18.2.0",
     "react": "^18.2.0"
+  },
+  "dependencies": {
+    "is-plain-obj": "^4.1.0"
   }
 }

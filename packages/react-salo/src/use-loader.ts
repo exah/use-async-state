@@ -1,6 +1,6 @@
 import { useTransition, useSyncExternalStore } from 'react'
-import type { LoaderKey, LoaderOptions, LoaderResult } from './types'
-import { useLoaderClient } from './loader-client-context'
+import type { LoaderKey, LoaderOptions, LoaderResult } from 'salo'
+import { useClient } from './client-context'
 import { use } from './use'
 
 export function useLoader<Data, Key extends LoaderKey = LoaderKey>(
@@ -8,7 +8,7 @@ export function useLoader<Data, Key extends LoaderKey = LoaderKey>(
 ): LoaderResult<Data> {
   const [isPending, startTransition] = useTransition()
 
-  const client = useLoaderClient<Data, Key>()
+  const client = useClient<Data, Key>()
   const loader = client.getOrCreate(options)
 
   if (loader.shouldInit()) {

@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react'
-import { createLoaderClient } from './create-loader-client'
-import type { LoaderClient, LoaderKey } from './types'
+import { createLoaderClient } from 'salo'
+import type { LoaderClient, LoaderKey } from 'salo'
 
 const defaultLoaderClient = createLoaderClient<any, any>()
 const LoaderClientContext = createContext(defaultLoaderClient)
 
-export const useLoaderClient = <Data, Key extends LoaderKey>() =>
+export const useClient = <Data, Key extends LoaderKey>() =>
   useContext<LoaderClient<Data, Key>>(LoaderClientContext)

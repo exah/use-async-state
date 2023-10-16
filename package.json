@@ -2,9 +2,8 @@
   "name": "salo-project",
   "private": true,
   "workspaces": [
-    "examples/vite",
-    "packages/react-salo",
-    "packages/react-salo-devtools"
+    "examples/*",
+    "packages/*"
   ],
   "prettier": {
     "arrowParens": "always",

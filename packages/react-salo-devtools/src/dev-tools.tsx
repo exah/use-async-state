@@ -1,8 +1,8 @@
 import { useReducer, useEffect } from 'react'
-import { useLoaderClient } from 'react-salo'
+import { useClient } from 'react-salo'
 
 export function DevTools() {
-  const client = useLoaderClient()
+  const client = useClient()
   const [, rerender] = useReducer((index) => index + 1, 0)
 
   useEffect(() => client.subscribe(rerender), [client])
