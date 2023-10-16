@@ -1,6 +1,6 @@
 import { createContext, useContext, Component } from 'react'
 
-interface ErrorBoundaryProps {
+export interface ErrorBoundaryProps {
   fallback?: React.ReactNode
   children?: React.ReactNode
 }

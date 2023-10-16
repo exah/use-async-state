@@ -1,4 +1,4 @@
-import { createContext } from 'react'
 import { createClient } from 'salo'
+import { createContext } from 'react'
 
-export const LoaderClientContext = createContext(createClient<any, any>())
+export const ClientContext = createContext(createClient<any, any>())
