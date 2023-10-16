@@ -24,7 +24,7 @@ export const matchFilter = <Data, Key extends LoaderKey>(
     return filter.predicate
   }
 
-  const hash = filter.key ? getHash(filter.key) : undefined
+  const hash = filter.key && getHash(filter.key)
 
   return (loader: Loader<Data, Key>) =>
     (!hash || matchFilterKey(hash, loader.hash, filter.exact)) &&
