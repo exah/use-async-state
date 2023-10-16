@@ -1,4 +1,4 @@
-import { useCaughtError } from '@exah/salo'
+import { useCaughtError } from 'react-salo'
 
 export function ErrorStatus() {
   const [error, recover] = useCaughtError()

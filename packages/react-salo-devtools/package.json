@@ -1,5 +1,5 @@
 {
-  "name": "@exah/salo",
+  "name": "react-salo-devtools",
   "type": "module",
   "version": "0.0.0",
   "sideEffects": false,
@@ -17,8 +17,5 @@
     "@types/react": "^18.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  },
-  "dependencies": {
-    "is-plain-obj": "^4.1.0"
   }
 }

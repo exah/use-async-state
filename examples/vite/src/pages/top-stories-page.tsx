@@ -1,6 +1,6 @@
-import { useLoader } from '@exah/salo'
-import * as api from '../api'
 import { Link } from 'react-router-dom'
+import { useLoader } from 'react-salo'
+import * as api from '../api'
 
 export function TopStoriesPage() {
   const result = useLoader({

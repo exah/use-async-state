@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { useLoader } from '@exah/salo'
+import { useLoader } from 'react-salo'
 import * as api from '../api'
 
 export function StoryPage() {

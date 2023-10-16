@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
-import { ErrorBoundary, DevTools } from '@exah/salo'
+import { ErrorBoundary } from 'react-salo'
+import { DevTools } from 'react-salo-devtools'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { TopStoriesPage } from './pages/top-stories-page'
 import { StoryPage } from './pages/story-page'

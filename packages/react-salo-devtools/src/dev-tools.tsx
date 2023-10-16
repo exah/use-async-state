@@ -1,5 +1,5 @@
 import { useReducer, useEffect } from 'react'
-import { useLoaderClient } from './loader-client-context'
+import { useLoaderClient } from 'react-salo'
 
 export function DevTools() {
   const client = useLoaderClient()
