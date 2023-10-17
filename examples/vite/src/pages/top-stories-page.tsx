@@ -25,7 +25,8 @@ export function TopStoriesPage() {
               <a href={post.url} target="_blank">
                 Open
               </a>
-            )}
+            )}{' '}
+            ({post.score})
           </li>
         ))}
       </ul>

@@ -1,10 +1,13 @@
 import type { LoaderKey, LoaderClient } from './types'
 import { createLoader } from './create-loader'
+import { requestIdleCallback } from './idle-callback'
 import { matchFilter } from './filters'
+import { IDLE_CALLBACK_TIMEOUT } from './contstants'
 
 export function createClient<Data, Key extends LoaderKey>() {
   const client: LoaderClient<Data, Key> = {
     loaders: [],
+    subscribers: [],
     find: (filter) => client.loaders.filter(matchFilter(filter)),
     findOne: (filter) => client.loaders.find(matchFilter(filter)),
     getOrCreate: (options) => {
@@ -36,7 +39,6 @@ export function createClient<Data, Key extends LoaderKey>() {
       client.loaders = []
       client.notify()
     },
-    subscribers: [],
     subscribe: (subscriber) => {
       client.subscribers.push(subscriber)
 
@@ -45,8 +47,9 @@ export function createClient<Data, Key extends LoaderKey>() {
       }
     },
     notify: () =>
-      requestIdleCallback(() =>
-        client.subscribers.forEach((subscriber) => subscriber())
+      requestIdleCallback(
+        () => client.subscribers.forEach((subscriber) => subscriber()),
+        { timeout: IDLE_CALLBACK_TIMEOUT }
       ),
   }
 

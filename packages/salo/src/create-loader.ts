@@ -1,21 +1,13 @@
-import type {
-  LoaderOptions,
-  LoaderKey,
-  LoaderClient,
-  LoaderSnapshot,
-  Loader,
-} from './types'
+import type { LoaderOptions, LoaderKey, LoaderClient, Loader } from './types'
 import { toSuspensePromise } from './promise'
+import { requestIdleCallback } from './idle-callback'
 import { getHash } from './filters'
-
-const DEFAULT_STALE_TIME = 1000 // 1 Second
-const DEFAULT_CACHE_TIME = 5 * 60 * 1000 // 5 Minutes
-const DEFAULT_SNAPSHOT: LoaderSnapshot<never> = {
-  get promise() {
-    return toSuspensePromise(Promise.reject(new Error('Promise is required')))
-  },
-  pending: false,
-}
+import {
+  DEFAULT_CACHE_TIME,
+  DEFAULT_STALE_TIME,
+  DEFAULT_SNAPSHOT,
+  IDLE_CALLBACK_TIMEOUT,
+} from './contstants'
 
 class CancellationError extends Error {
   constructor() {
@@ -72,8 +64,9 @@ export function createLoader<Data, Key extends LoaderKey>(
       }
     },
     notify: () =>
-      requestIdleCallback(() =>
-        loader.subscribers.forEach((subscriber) => subscriber())
+      requestIdleCallback(
+        () => loader.subscribers.forEach((subscriber) => subscriber()),
+        { timeout: IDLE_CALLBACK_TIMEOUT }
       ),
     scheduleGC: () => {
       loader.gcTimeout = setTimeout(() => {

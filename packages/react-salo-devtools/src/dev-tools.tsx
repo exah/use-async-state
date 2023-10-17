@@ -15,7 +15,7 @@ export function DevTools() {
             <details>
               <summary>
                 {JSON.stringify(loader.key)}: {loader.state}{' '}
-                {loader.stale ? 'stale' : 'fresh'}{' '}
+                {loader.stale || loader.shouldInvalidate() ? 'stale' : 'fresh'}{' '}
                 {loader.snapshot.promise.status}
                 <button
                   type="button"
