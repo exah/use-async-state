@@ -22,6 +22,7 @@ export function DevTools() {
       }}
     >
       <summary>
+        Active: {client.loaders.length}{' '}
         <button type="button" onClick={() => client.invalidate()}>
           Invalidate all
         </button>
