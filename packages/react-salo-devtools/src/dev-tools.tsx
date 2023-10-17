@@ -8,7 +8,27 @@ export function DevTools() {
   useEffect(() => client.subscribe(rerender), [client])
 
   return (
-    <>
+    <details
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        width: '100%',
+        maxHeight: 300,
+        overflow: 'auto',
+        background: 'black',
+        color: 'white',
+        padding: 16,
+      }}
+    >
+      <summary>
+        <button type="button" onClick={() => client.invalidate()}>
+          Invalidate all
+        </button>
+        <button type="button" onClick={() => client.reset()}>
+          Reset all
+        </button>
+      </summary>
       <ul>
         {client.loaders.map((loader) => (
           <li key={loader.hash.toString()}>
@@ -50,12 +70,6 @@ export function DevTools() {
           </li>
         ))}
       </ul>
-      <button type="button" onClick={() => client.invalidate()}>
-        Invalidate all
-      </button>
-      <button type="button" onClick={() => client.reset()}>
-        Reset all
-      </button>
-    </>
+    </details>
   )
 }
